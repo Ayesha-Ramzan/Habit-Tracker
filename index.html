@@ -11,10 +11,11 @@
   --purple:#7C3AED;--purple-l:#EDE9FE;--purple-m:#A78BFA;--purple-d:#5B21B6;
   --bg:#F9F7FF;--surface:#fff;--border:#E5E0F8;
   --text:#1A1523;--muted:#6B6880;--success:#10B981;--warn:#F59E0B;--danger:#EF4444;
-  --r:12px;
+  --r:12px;--habit-col:170px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-weight:500}
+html{-webkit-text-size-adjust:100%}
+body{overflow-x:hidden;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-weight:500}
 
 /* BACKGROUND DOODLES */
 .bg-doodles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
@@ -27,7 +28,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 /* HEADER */
 .hdr{background:var(--purple);color:#fff;padding:0;position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(124,58,237,.25)}
-.hdr-inner{max-width:1120px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.hdr-inner{max-width:1280px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .logo{font-family:'DM Serif Display',serif;font-size:21px;letter-spacing:-.5px;font-weight:700}
 .logo small{display:block;font-family:'DM Sans',sans-serif;font-size:11px;opacity:.65;font-weight:300;margin-top:-2px}
 .nav{display:flex;gap:3px;background:rgba(255,255,255,.15);border-radius:10px;padding:4px}
@@ -39,11 +40,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .mth-label{font-size:14px;font-weight:500;min-width:130px;text-align:center}
 
 /* MAIN */
-.main{max-width:1120px;margin:0 auto;padding:24px}
+.main{max-width:1280px;margin:0 auto;padding:24px}
 .page{display:none}.page.on{display:block}
 
 /* STATS */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:24px}
 .sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden}
 .sc-accent{position:absolute;top:0;left:0;width:4px;height:100%;border-radius:var(--r) 0 0 var(--r)}
 .sc-val{font-size:28px;font-weight:700;color:var(--text);line-height:1}
@@ -62,17 +63,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .tp-lbl{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap}
 .tp-arrow{color:var(--purple);font-weight:700;font-size:13px}
 .time-pick input{border:none;background:none;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text);font-weight:600;outline:none;cursor:pointer;padding:2px}
-.time-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--purple);background:var(--purple-l);padding:2px 8px;border-radius:20px;margin-top:3px}
+.time-badge{display:flex;width:fit-content;max-width:100%;white-space:nowrap;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--purple);background:var(--purple-l);padding:2px 8px;border-radius:20px;margin-top:3px}
 
 /* HABIT TABLE */
-.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-.tbl-head{display:grid;align-items:center;padding:10px 16px;background:#F4F0FD;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-.tbl-row{display:grid;align-items:center;padding:10px 16px;border-bottom:1px solid var(--border);transition:background .15s}
+.tbl-wrap{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;max-width:100%}
+.tbl-inner{min-width:calc(var(--habit-col) + var(--days,31)*28px + 152px)}
+.gcols{display:grid;align-items:center;grid-template-columns:minmax(var(--habit-col),1fr) repeat(var(--days,31),28px) 70px 50px}
+.gcols>div:first-child{align-self:stretch;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;position:sticky;left:0;z-index:2;background:inherit;min-width:0;padding-right:10px}
+.gcols>div:first-child::after{content:'';position:absolute;top:0;right:0;bottom:0;width:1px;background:var(--border)}
+.numrow{padding:6px 16px;background:#F4F0FD;border-bottom:1px solid var(--border);font-size:10px;color:var(--muted)}
+.numrow .n{text-align:center}
+.numrow .n.t{color:var(--purple);font-weight:700}
+.tbl-head{padding:10px 16px;background:#F4F0FD;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.tbl-row{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface);transition:background .15s}
 .tbl-row:last-child{border-bottom:none}
 .tbl-row:hover{background:#FAFAFF}
-.habit-name{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbl-row:hover>div:first-child{background:#FAFAFF}
+.habit-name{max-width:100%;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .habit-cat{font-size:11px;padding:2px 8px;border-radius:20px;display:inline-block;margin-top:3px;font-weight:500}
-.day-cell{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .15s;background:var(--bg);margin:0 auto;user-select:none}
+.day-cell{flex:none;width:26px;height:26px;border-radius:6px;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .15s;background:var(--bg);margin:0 auto;user-select:none}
 .day-cell.done{border:none;color:#fff}
 .day-cell.today-col{box-shadow:0 0 0 2px var(--purple)}
 .day-cell:hover{transform:scale(1.1)}
@@ -91,14 +100,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .dn.today-num{color:var(--purple);font-weight:700}
 
 /* CHARTS PAGE */
-.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
-.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.charts-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;margin-bottom:20px}
+.chart-card{min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px}
 .chart-card h3{font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px}
 .chart-card.full{grid-column:1/-1}
-canvas{max-height:220px}
+canvas{max-height:220px;max-width:100%}
 
 /* HABITS SUMMARY TABLE */
-.sum-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.sum-tbl{min-width:560px;white-space:nowrap;width:100%;border-collapse:collapse;font-size:13px}
 .sum-tbl th{text-align:left;padding:8px 12px;background:#F4F0FD;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
 .sum-tbl td{padding:10px 12px;border-top:1px solid var(--border)}
 .sum-tbl tr:hover td{background:#FAFAFF}
@@ -109,17 +118,36 @@ canvas{max-height:220px}
 .mini-fill{height:100%;background:var(--purple);border-radius:3px}
 
 /* RESPONSIVE */
-@media(max-width:768px){
-  .stats{grid-template-columns:repeat(2,1fr)}
-  .charts-grid{grid-template-columns:1fr}
-  .charts-grid .chart-card.full{grid-column:1}
-  .mth-label{min-width:100px;font-size:12px}
-  .hdr-inner{padding:10px 14px}
-  .main{padding:14px}
+@media(max-width:900px){
+  .main{padding:18px}
 }
-@media(max-width:500px){
-  .stats{grid-template-columns:repeat(2,1fr)}
-  .nav button{padding:6px 10px;font-size:12px}
+@media(max-width:768px){
+  :root{--habit-col:140px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px}
+  .sc{padding:14px 14px 14px 16px}
+  .sc-val{font-size:24px}
+  .charts-grid{grid-template-columns:minmax(0,1fr)}
+  .charts-grid .chart-card.full{grid-column:1}
+  .hdr-inner{padding:10px 14px;gap:10px}
+  .logo{font-size:19px;order:1}
+  .mth-nav{order:2;margin-left:auto}
+  .nav{order:3;width:100%}
+  .nav button{flex:1;padding:8px 6px;font-size:12.5px}
+  .mth-label{min-width:104px;font-size:13px}
+  .main{padding:14px}
+  .add-bar{padding:12px;gap:8px}
+  .add-bar input{flex:1 1 100%;min-width:0}
+  .add-bar select{flex:1 1 auto;min-width:0}
+  .time-pick{flex:1 1 100%;justify-content:space-between}
+  .time-pick input{min-width:0;flex:1}
+  .add-btn{flex:1 1 100%;padding:11px 22px}
+  .chart-card{padding:14px}
+}
+@media(max-width:400px){
+  .sc-val{font-size:21px}
+  .sc-lbl{font-size:11px}
+  .logo small{display:none}
+  .bg-doodles{display:none}
 }
 
 .tag{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600}
@@ -259,6 +287,7 @@ const CATS={
 
 let habits=[],checks={};
 let viewDate=new Date();
+let scrollToToday=true;
 
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -318,6 +347,7 @@ function delHabit(hid){
 
 function changeMonth(d){
   viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()+d,1);
+  scrollToToday=true;
   renderAll();
 }
 
@@ -404,29 +434,20 @@ function renderTracker(){
     return;
   }
 
-  // Day numbers
-  const dayNums=days.map((d,i)=>{
-    const isT=d.getDate()===t.getDate()&&d.getMonth()===t.getMonth()&&d.getFullYear()===t.getFullYear();
-    return `<div class="dn ${isT?'today-num':''}">${d.getDate()}</div>`;
-  }).join('');
-
-  // Column template
-  const cols=`1fr repeat(${days.length},28px) 70px 50px`;
-
-  let html=`
-    <div class="tbl-head" style="grid-template-columns:${cols}">
+  let html=`<div class="tbl-inner" style="--days:${days.length}">
+    <div class="tbl-head gcols">
       <div>Habit</div>
       ${days.map(d=>`<div style="text-align:center;font-size:10px">${DAYS[d.getDay()][0]}</div>`).join('')}
       <div style="text-align:center">Streak</div>
       <div></div>
     </div>
-    <div style="display:flex;align-items:center;padding:6px 16px;background:#F4F0FD;border-bottom:1px solid var(--border)">
-      <div style="flex:1"></div>
-      ${days.map((d)=>{
+    <div class="numrow gcols">
+      <div></div>
+      ${days.map(d=>{
         const isT=d.getDate()===t.getDate()&&d.getMonth()===t.getMonth()&&d.getFullYear()===t.getFullYear();
-        return `<div style="width:28px;text-align:center;font-size:10px;font-weight:${isT?700:400};color:${isT?'var(--purple)':'var(--muted)'};">${d.getDate()}</div>`;
+        return `<div class="n ${isT?'t':''}">${d.getDate()}</div>`;
       }).join('')}
-      <div style="width:70px"></div><div style="width:50px"></div>
+      <div></div><div></div>
     </div>
   `;
 
@@ -445,7 +466,7 @@ function renderTracker(){
       </div>`;
     }).join('');
     html+=`
-      <div class="tbl-row fade-in" style="grid-template-columns:${cols}">
+      <div class="tbl-row gcols fade-in">
         <div>
           <div class="habit-name">${esc(h.name)}</div>
           <span class="habit-cat" style="background:${cat.bg};color:${cat.text}">${cat.label}</span>
@@ -461,7 +482,13 @@ function renderTracker(){
     `;
   });
 
-  tbl.innerHTML=html;
+  tbl.innerHTML=html+'</div>';
+  if(scrollToToday){
+    scrollToToday=false;
+    const n=tbl.querySelector('.numrow .n.t');
+    if(n)tbl.scrollLeft=Math.max(0,n.offsetLeft-tbl.clientWidth/2);
+    else tbl.scrollLeft=0;
+  }
 }
 
 let barChartInst,donutInst,lineInst;
