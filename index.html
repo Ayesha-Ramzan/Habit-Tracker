@@ -327,17 +327,44 @@ function getDaysArr(){
   return Array.from({length:total},(_,i)=>new Date(y,m,i+1));
 }
 
+function esc(s){
+  return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 function calcStreak(hid){
   let streak=0,d=today();
+  // today not checked yet shouldn't break a streak that is still alive
+  if(!checks[key(hid,d)])d.setDate(d.getDate()-1);
   while(true){const k=key(hid,d);if(checks[k]){streak++;d.setDate(d.getDate()-1);}else break;}
   return streak;
 }
 
+// longest run of consecutive checked days across all time
 function calcBestStreak(hid){
-  const days=getDaysArr();
-  let best=0,cur=0;
-  days.forEach(d=>{const k=key(hid,d);if(checks[k]){cur++;best=Math.max(best,cur);}else cur=0;});
+  const prefix=hid+'-';
+  const days=Object.keys(checks)
+    .filter(k=>checks[k]&&k.startsWith(prefix))
+    .map(k=>{const[y,m,d]=k.slice(prefix.length).split('-').map(Number);return new Date(y,m-1,d)})
+    .sort((a,b)=>a-b);
+  let best=0,cur=0,prev=null;
+  days.forEach(d=>{
+    cur=(prev&&Math.round((d-prev)/864e5)===1)?cur+1:1;
+    best=Math.max(best,cur);
+    prev=d;
+  });
   return best;
+}
+
+// days in the viewed month that count for this habit: from the day it was
+// created onwards, plus any earlier day the user checked anyway
+function activeDays(h){
+  const c=new Date(h.created||h.id);
+  const start=new Date(c.getFullYear(),c.getMonth(),c.getDate());
+  return getDaysArr().filter(d=>d>=start||checks[key(h.id,d)]).length;
+}
+function pctOf(h){
+  const a=activeDays(h);
+  return a?Math.round(calcMonthDone(h.id)/a*100):0;
 }
 
 function calcMonthDone(hid){
@@ -355,9 +382,9 @@ function renderStats(containerId){
   const todayKey=fmtDate(t);
   const doneToday=habits.filter(h=>checks[key(h.id,t)]).length;
   const totalChecks=habits.reduce((a,h)=>a+days.filter(d=>checks[key(h.id,d)]).length,0);
-  const maxChecks=habits.length*days.length;
+  const maxChecks=habits.reduce((a,h)=>a+activeDays(h),0);
   const pct=maxChecks?Math.round(totalChecks/maxChecks*100):0;
-  const bestStreak=habits.length?Math.max(...habits.map(h=>calcStreak(h.id))):0;
+  const bestStreak=habits.length?Math.max(...habits.map(h=>calcBestStreak(h.id))):0;
   const el=document.getElementById(containerId);
   el.innerHTML=`
     <div class="sc fade-in"><div class="sc-accent" style="background:#7C3AED"></div><div class="sc-val">${habits.length}</div><div class="sc-lbl">Total Habits</div></div>
@@ -407,7 +434,7 @@ function renderTracker(){
     const cat=CATS[h.cat]||CATS.other;
     const streak=calcStreak(h.id);
     const done=calcMonthDone(h.id);
-    const pct=Math.round(done/days.length*100);
+    const pct=pctOf(h);
     const cells=days.map(d=>{
       const isDone=!!checks[key(h.id,d)];
       const isT=d.getDate()===t.getDate()&&d.getMonth()===t.getMonth()&&d.getFullYear()===t.getFullYear();
@@ -420,7 +447,7 @@ function renderTracker(){
     html+=`
       <div class="tbl-row fade-in" style="grid-template-columns:${cols}">
         <div>
-          <div class="habit-name">${h.name}</div>
+          <div class="habit-name">${esc(h.name)}</div>
           <span class="habit-cat" style="background:${cat.bg};color:${cat.text}">${cat.label}</span>
           ${h.start?`<div class="time-badge">⏰ ${fmtTime(h.start)}${h.end?' → '+fmtTime(h.end):''}</div>`:''}
           <div class="pct-bar"><div class="pct-fill" style="width:${pct}%;background:${cat.color}"></div></div>
@@ -518,7 +545,7 @@ function renderSummary(){
   const sorted=[...habits].map(h=>({
     ...h,
     done:calcMonthDone(h.id),
-    pct:Math.round(calcMonthDone(h.id)/days.length*100),
+    pct:pctOf(h),
     best:calcBestStreak(h.id),
     streak:calcStreak(h.id)
   })).sort((a,b)=>b.pct-a.pct);
@@ -527,9 +554,9 @@ function renderSummary(){
     const cat=CATS[h.cat]||CATS.other;
     return `<tr class="fade-in">
       <td><span class="rank-badge">${i+1}</span></td>
-      <td><strong>${h.name}</strong></td>
+      <td><strong>${esc(h.name)}</strong></td>
       <td><span class="tag" style="background:${cat.bg};color:${cat.text}">${cat.label}</span></td>
-      <td>${h.done} / ${days.length} days</td>
+      <td>${h.done} / ${activeDays(h)} days</td>
       <td><strong style="color:${h.pct>=70?'#10B981':h.pct>=40?'#F59E0B':'#EF4444'}">${h.pct}%</strong></td>
       <td>${h.best>0?`🔥 ${h.best} days`:'—'}</td>
       <td><div class="mini-prog" style="width:100px"><div class="mini-fill" style="width:${h.pct}%;background:${cat.color}"></div></div></td>
